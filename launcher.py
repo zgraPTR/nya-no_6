@@ -17,13 +17,9 @@ import zipfile
 # スクリプトのディレクトリに移動
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-# ファイルパスの定義
-CURRENT_DIR = os.path.basename(os.getcwd())
 FILE_PATH = os.path.basename(__file__)
 
-
-# ファイル、ディレクトリ名
-BOT_DIR = "./bot"
+ZIP_DIR = "./bot"
 ZIP_NAME = "bot"
 ZIP_FILENAME = "bot.zip"
 
@@ -34,13 +30,13 @@ class Zip:
     def make_zip(self):
         """zipファイルの作成"""
 
-        shutil.make_archive(ZIP_NAME, "zip", root_dir=BOT_DIR)
+        shutil.make_archive(ZIP_NAME, "zip", root_dir=ZIP_DIR)
 
     def unpack_zip(self):
         """zipファイルの解凍"""
 
         with zipfile.ZipFile(ZIP_FILENAME) as existing_zip:
-            existing_zip.extractall(BOT_DIR)
+            existing_zip.extractall(ZIP_DIR)
 
 
 class Ftps:
@@ -90,18 +86,30 @@ class InputFunction:
     def run(self):
         """Botをサブプロセスで実行する"""
 
-        process = subprocess.Popen(
-            ["python", "./bot/run.py"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            universal_newlines=True,
-        )
+        token_key = input("\nToken Key : ")
 
-        process.communicate()
+        is_loop = True
+        while is_loop:
+            process = subprocess.Popen(
+                ["python", "./bot/run.py", token_key],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+            )
 
-        # .stdoutに標準出力、.stderrに標準エラー出力が格納される
-        print(process.stderr)
-        print(process.returncode)
+            while process.poll() is None:
+                line = process.stdout.readline()
+                if line:
+                    print(line)
+
+            os.system("clear")
+
+            returncode = process.returncode
+            if returncode == 5:
+                InputFunction().unpack()
+            if returncode != 5:
+                is_loop = False
+                print("\n実行が終了しました。")
 
 
 def if_function(args):
@@ -119,14 +127,13 @@ def if_function(args):
 def main():
     """メイン関数"""
 
-    # 引数の確認
     if len(sys.argv) < 2:
         print("\n実行 : 0\nZIP送信 : 1\n解凍 : 2\n")
-        args = input("\n数字を入力 : ")
+        argv = input("\n数字を入力 : ")
     else:
-        args = sys.argv[1]
+        argv = sys.argv[1]
 
-    if_function(args)
+    if_function(argv)
 
 
 if __name__ == "__main__":

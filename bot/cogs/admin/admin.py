@@ -10,12 +10,12 @@ from discord.ext import commands
 from modules import is_owner
 
 
-def cmd(args1: str) -> str:
+def cmd(argv: str) -> str:
     """cmd 実行"""
 
     try:
         cmd_run = subprocess.run(
-            args1, shell=True, stdout=-1, stderr=-2, text=True, timeout=10, check=False
+            argv, shell=True, stdout=-1, stderr=-2, text=True, timeout=10, check=False
         )
         cmd_res = cmd_run.stdout
         print("\n", cmd_res)
@@ -38,12 +38,12 @@ class Admin(commands.Cog):
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    @app_commands.describe(args1="コマンド")
-    async def cmd(self, interaction: discord.Interaction, args1: str):
+    @app_commands.describe(argv="コマンド")
+    async def cmd(self, interaction: discord.Interaction, argv: str):
         """A: cmd実行"""
 
         await interaction.response.send_message("💻 実行しています...")
-        await interaction.channel.send(cmd(args1), ephemeral=True)
+        await interaction.channel.send(cmd(argv))
 
     @app_commands.command()
     @app_commands.check(is_owner)
@@ -53,7 +53,6 @@ class Admin(commands.Cog):
         for vcc in self.bot.voice_clients:
             await vcc.disconnect(force=True)
 
-        cmd("clear")
         await interaction.response.send_message("⚙ 終了中です。", ephemeral=True)
         os._exit(4)
 

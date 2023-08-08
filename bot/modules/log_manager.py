@@ -2,7 +2,6 @@
 
 import logging
 import os
-import sys
 import time
 
 import discord
@@ -18,17 +17,20 @@ class Logger:
 
         self.config = Config()
 
-        self.fh = logging.FileHandler(self.config.log_dir + filepath, encoding="utf-8")
-        self.logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(filepath)
+        self.logger.setLevel(logging.WARNING)
 
-        logging.basicConfig(
-            level=logging.WARNING,
-            format="----------\n%(asctime)s : [%(levelname)s] \nメッセージ : %(message)s",
-            handlers=[
-                self.fh,
-                logging.StreamHandler(sys.stdout),
-            ],
-        )
+        self.formatter = logging.Formatter("----------\n%(asctime)s \n%(message)s")
+
+        self.handler = logging.StreamHandler()
+        self.handler.setLevel(logging.WARNING)
+        self.handler.setFormatter(self.formatter)
+        self.logger.addHandler(self.handler)
+
+        self.fh = logging.FileHandler(self.config.log_dir + filepath, encoding="utf-8")
+        self.fh.setLevel(logging.WARNING)
+        self.fh.setFormatter(self.formatter)
+        self.logger.addHandler(self.fh)
 
     async def message_log(
         self, message: discord.Message, edited_message: discord.Message, event_type: str

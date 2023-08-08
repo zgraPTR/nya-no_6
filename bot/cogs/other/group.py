@@ -28,17 +28,6 @@ class Group(commands.Cog):
         )
 
     @app_commands.command()
-    @app_commands.describe(content="内容")
-    async def contact(self, interaction: discord.Interaction, content: str):
-        """お問い合わせ"""
-
-        user = await self.bot.fetch_user(555729675213602816)
-        await user.send(
-            f"--------------------\n名前: {interaction.user.name} ({interaction.user.id})\n内容: {content}"
-        )
-        await interaction.response.send_message("💬 送信しました。", ephemeral=True)
-
-    @app_commands.command()
     @app_commands.describe(formula="式")
     async def eval(self, interaction: discord.Interaction, formula: str):
         """式計算"""
@@ -46,7 +35,9 @@ class Group(commands.Cog):
         if not safe_pattern.match(formula):
             await interaction.response.send_message("⛔ 計算不可能 : 不正な文字列です。")
         else:
-            await interaction.response.send_message(f"{formula} = {eval(formula)}")
+            await interaction.response.send_message(
+                f"```py\n{formula} = {eval(formula)}\n```"
+            )
 
     @app_commands.command()
     @app_commands.describe(userid="ユーザー固有ID")

@@ -1,7 +1,6 @@
 """権限確認"""
 
 import discord
-from discord.ext import commands
 
 from .config import Config
 from .file_manager import FileManager

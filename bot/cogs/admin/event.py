@@ -35,6 +35,9 @@ class Event(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         """ロード時"""
+
+        await self.bot.tree.sync()
+        await self.bot.change_presence(activity=discord.Game(name="にゃーの6代目"))
         self.logger.write("WARNING", f"Event > {self.bot.user.display_name} ログインしました。")
 
     @commands.Cog.listener()

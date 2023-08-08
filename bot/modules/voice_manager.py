@@ -6,7 +6,7 @@ import re
 import discord
 from gtts import gTTS
 
-from modules import Config, FileManager, Logger
+from modules import Config, FileManager
 
 
 class VcConfig:
@@ -134,7 +134,7 @@ class VoicePlayer:
         speech.save(savedir)
         return savedir
 
-    async def queue(self, message: discord.Message | str = None):
+    async def queue(self, message: discord.message.Message | str = None):
         """再生
         Args:
             message (discord.Message | str): 読み上げないよう(もしくはメッセージ本体)
@@ -160,7 +160,6 @@ class VoicePlayer:
                 source, after=lambda a: self.loop1.create_task(self.done())
             )
         except discord.errors.ClientException as clientex:
-            Logger.write("ERROR", f"VoicePlayer.queue() > エラー : {clientex}")
             if isinstance(message, discord.message.Message):
-                await message.channel.send("> :x: 読み上げエラーが発生しました。\n再接続しています...")
-            await self.vc_client.connect(force=True)
+                await message.channel.send(f"⛔ 読み上げエラー : {clientex}")
+            await self.vc_client.disconnect(force=True)

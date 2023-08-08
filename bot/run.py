@@ -3,14 +3,17 @@
 
 import asyncio
 import os
+import sys
 
 import discord
 from discord.ext import commands
 
-from modules import FileManager, Config, Xor
+from modules import FileManager, Config, Xor, Logger
 
 intents = discord.Intents.default()
 intents.message_content = True
+
+logger = Logger("error.log")
 
 
 class ErrorTree(discord.app_commands.CommandTree):
@@ -24,11 +27,10 @@ class ErrorTree(discord.app_commands.CommandTree):
         interaction: discord.Interaction,
         error: discord.app_commands.AppCommandError,
     ):
-        try:
-            await interaction.response.send_message(":no_entry: エラーが発生しました。")
-            raise error
-        except Exception as exeption:
-            await interaction.channel.send(f":no_entry: エラー : {exeption}")
+        await interaction.channel.send(
+            f">>> :no_entry: エラーが発生しました。\n{type(error)} : {error}"
+        )
+        logger.write("ERROR", f"{type(error)} : {error}")
 
 
 bot = commands.Bot(
@@ -41,18 +43,30 @@ async def start():
 
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-    for i in os.listdir("./cogs"):
-        await bot.load_extension(f"cogs.{i}")
+    config = Config()
+
+    for folder in config.dir_dict:
+        os.makedirs(config.assets_dir + folder, exist_ok=True)
 
     fm = FileManager()
-    config = Config()
+
+    # token準備
     token = fm.read_data(config.token_path)
 
     if not token:
-        token = input("Discord Bot Token : ")
-    else:
-        token_key = input("Token Key : ")
-        token = Xor().decrypto_hex_to_text(token, token_key)
+        logger.write(
+            "ERROR", "tokenファイルが見つかりません。\n/script/set_token.py でtokenを設定してください。"
+        )
+        os._exit(0)
+    if len(sys.argv) < 2:
+        logger.write("ERROR", "Token Keyが見つかりません。")
+        os._exit(0)
+
+    token_key = sys.argv[1]
+    token = Xor().decrypto_hex_to_text(token, token_key)
+
+    for i in os.listdir("./cogs"):
+        await bot.load_extension(f"cogs.{i}")
 
     await bot.start(token)
 
