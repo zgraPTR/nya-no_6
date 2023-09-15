@@ -8,7 +8,7 @@ ASSETS_DIR = "../assets/"
 class Config:
     """設定値 (デフォルト)"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         """初期化"""
         pass
 

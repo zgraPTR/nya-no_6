@@ -16,10 +16,9 @@ class Group(commands.Cog):
         self.bot = bot
 
     @app_commands.command()
-    @app_commands.describe(user="ユーザー")
+    @app_commands.describe(user="Boop!先")
     async def boop(self, interaction: discord.Interaction, user: discord.User):
         """Boop!"""
-
         from_user = interaction.user.name
         channel = await user.create_dm()
         await channel.send(f"From {from_user}: Boop!")
@@ -40,10 +39,9 @@ class Group(commands.Cog):
             )
 
     @app_commands.command()
-    @app_commands.describe(userid="ユーザー固有ID")
+    @app_commands.describe(userid="ユーザーID")
     async def profile(self, interaction: discord.Interaction, userid: str):
         """ユーザーIDからプロフィール取得"""
-
         user = await self.bot.fetch_user(int(userid))
         embed = discord.Embed(title=userid)
         embed.set_thumbnail(url=user.avatar)
@@ -57,7 +55,6 @@ class Group(commands.Cog):
     @app_commands.command()
     async def ping(self, interaction: discord.Interaction):
         """Ping!"""
-
         await interaction.response.send_message(
             f"💻 Ping: {round(self.bot.latency*1000, 1)}ms", ephemeral=True
         )

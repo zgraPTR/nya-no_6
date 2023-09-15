@@ -17,19 +17,19 @@ logger = Logger("error.log")
 
 
 class ErrorTree(discord.app_commands.CommandTree):
-    """ツリークラス
-    Args:
-        discord (_type_): _description_
-    """
+    """ツリークラス"""
 
     async def on_error(
         self,
         interaction: discord.Interaction,
         error: discord.app_commands.AppCommandError,
     ):
-        await interaction.channel.send(
-            f">>> :no_entry: エラーが発生しました。\n{type(error)} : {error}"
-        )
+        content = f">>> :no_entry: エラーが発生しました。\n{type(error)} : {error}"
+        if interaction.response.is_done():
+            await interaction.channel.send(content)
+        else:
+            await interaction.response.send_message(content)
+
         logger.write("ERROR", f"{type(error)} : {error}")
 
 
@@ -45,7 +45,7 @@ async def start():
 
     config = Config()
 
-    for folder in config.dir_dict:
+    for folder in config.dir_dict.values():
         os.makedirs(config.assets_dir + folder, exist_ok=True)
 
     fm = FileManager()

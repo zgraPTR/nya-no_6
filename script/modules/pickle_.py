@@ -11,7 +11,7 @@ config_path = "assets/config/"
 class Pick:
     """設定ファイル"""
 
-    def __init__(self, filepath="config.bin") -> None:
+    def __init__(self, filepath="config.bin"):
         """初期化
         Args:
             filepath (str): ファイル名. Defaults to "Config.pick".
@@ -26,7 +26,7 @@ class Pick:
         with open(self.filepath, mode="rb") as f:
             return pickle.load(f)
 
-    def write(self, objdata) -> None:
+    def write(self, objdata):
         """書き込む
         Args:
             objdata (_type_): 保存するオブジェクト

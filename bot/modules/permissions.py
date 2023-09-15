@@ -4,14 +4,13 @@ import discord
 
 from .config import Config
 from .file_manager import FileManager
-from .voice_manager import VoiceManager
+from .voice_manager import VcConfig
 
 
-def is_owner(interaction: discord.Interaction):
+def is_owner(interaction: discord.Interaction) -> bool:
     """管理者確認
-
     Args:
-        interaction (discord.Interaction):
+        interaction (discord.Interaction)
     """
     FileManager().read_config()
     return str(interaction.user.id) in Config.data.get("is_owner", "555729675213602816")
@@ -22,14 +21,13 @@ async def is_join(interaction: discord.Interaction) -> bool:
 
     user = interaction.user
     guild = interaction.guild
-    vcm = VoiceManager()
+    vcc = VcConfig()
 
     if not user.voice:
         await interaction.response.send_message(":question: VCに未接続です。")
         return False
 
     vc_client = guild.voice_client or await user.voice.channel.connect()
-    vcm.data.voice_clients[guild.id] = vc_client
-    vcm.write()
+    vcc.voice_clients[guild.id] = vc_client
 
     return True

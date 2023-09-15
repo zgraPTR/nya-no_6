@@ -11,7 +11,7 @@ from .config import Config
 class FileManager:
     """"""
 
-    def __init__(self) -> None:
+    def __init__(self):
         """初期化"""
         self.config = Config()
 
@@ -51,7 +51,7 @@ class FileManager:
 
         Config.data = self.read_data("config.bin")
 
-    def write_data(self, filename: str, objdata) -> None:
+    def write_data(self, filename: str, objdata):
         """pklファイル書き込み
         Args:
             filename (str): ファイル名

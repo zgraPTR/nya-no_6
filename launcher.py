@@ -100,7 +100,7 @@ class InputFunction:
             while process.poll() is None:
                 line = process.stdout.readline()
                 if line:
-                    print(line)
+                    print(line, end="")
 
             os.system("clear")
 

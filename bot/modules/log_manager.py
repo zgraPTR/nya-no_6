@@ -12,7 +12,7 @@ from .config import Config
 class Logger:
     """ロガー"""
 
-    def __init__(self, filepath) -> None:
+    def __init__(self, filepath):
         """初期化"""
 
         self.config = Config()
@@ -34,7 +34,7 @@ class Logger:
 
     async def message_log(
         self, message: discord.Message, edited_message: discord.Message, event_type: str
-    ) -> None:
+    ):
         """メッセージの ログ保存
         Args:
             message (discord.Message): 削除されたメッセージ or 編集前メッセージ
@@ -61,8 +61,13 @@ class Logger:
 
         self.write("WARNING", content)
 
-    async def save_attachment(self, attachment: discord.Attachment):
-        """ファイル保存"""
+    async def save_attachment(self, attachment: discord.Attachment) -> str:
+        """ファイル保存
+        Args:
+            attachment (discord.Attachment)
+        Returns:
+            str: ファイル名
+        """
 
         timestamp = int(time.time())
         file_name = f"{timestamp}_{attachment.filename}"
@@ -72,8 +77,8 @@ class Logger:
     def write(self, level="WARNING", message=""):
         """ログ出力
         Args:
-            level (str): WARNING, ERROR. Defaults to "WARNING".
-            message (str): message. Defaults to "".
+            level (str): WARNING, ERROR.
+            message (str): 内容
         """
         if level == "ERROR":
             self.logger.error(message)

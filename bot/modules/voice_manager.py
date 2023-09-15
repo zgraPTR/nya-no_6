@@ -1,6 +1,5 @@
 """VC管理"""
 
-import asyncio
 import re
 
 import discord
@@ -10,7 +9,16 @@ from modules import Config, FileManager
 
 
 class VcConfig:
-    """Vc設定"""
+    """VC値 (デフォ)"""
+
+    singleton = None
+    name = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls.singleton == None:
+            cls.singleton = super().__new__(cls)
+        # クラスのインスタンスを返す
+        return cls.singleton
 
     music_loops: dict[int, bool] = {}
     music_queues: dict[int, list[str]] = {}
@@ -21,91 +29,16 @@ class VcConfig:
     voice_clients: dict[int, discord.voice_client.VoiceClient] = {}
 
 
-class VoiceManager:
-    """VCデータ管理"""
-
-    def __init__(self) -> None:
-        """初期化"""
-
-        self.vcc = VcConfig()
-        self.fm = FileManager()
-        self.config = Config()
-        self.vcc: VcConfig | None
-        self.read()
-
-    def delete_vc_data(self, guild_id: int, data_type: str = "all") -> None:
-        """VCデータ削除
-        Args:
-            guild_id (int): ギルドID
-            data_type (str): music->音楽系削除, tts->読み上げ系削除, all->全削除
-        """
-
-        if data_type == "music":
-            self.vcc.music_queues.pop(guild_id, None)
-            self.vcc.music_loops.pop(guild_id, None)
-        elif data_type == "tts":
-            self.vcc.tts_queues.pop(guild_id, None)
-            self.vcc.tts_statuses.pop(guild_id, None)
-        elif data_type == "all":
-            self.vcc.music_queues.pop(guild_id, None)
-            self.vcc.music_loops.pop(guild_id, None)
-            self.vcc.tts_queues.pop(guild_id, None)
-            self.vcc.tts_statuses.pop(guild_id, None)
-            self.vcc.voice_clients.pop(guild_id, None)
-
-        self.write()
-
-    def write(self):
-        """VCデータ書き込み"""
-
-        self.fm.write_data(self.config.voice_path, self.vcc)
-
-    def read(self):
-        """VCデータ読み込み"""
-
-        self.vcc = self.fm.read_data(self.config.voice_path)
-        if not self.vcc:
-            self.vcc = VcConfig()
-            self.write()
-
-    @property
-    def data(self):
-        return self.vcc
-
-
 class VoicePlayer:
     """VC再生"""
 
-    def __init__(self, guild_id: int):
-        """初期化
-        Args:
-            guild_id (int): ギルドID
-        """
+    def __init__(self, guild_id: int, vc_client: discord.voice_client.VoiceClient):
+        """初期化"""
 
         self.config = Config()
         self.fm = FileManager()
-        self.vcm = VoiceManager()
-
         self.guild_id = guild_id
-        self.vc_client: discord.VoiceClient = self.vcm.data.voice_clients.get(
-            guild_id, None
-        )
-        self.loop1 = asyncio.get_event_loop()
-
-    async def done(self):
-        """再生終了後"""
-
-        if not self.vc_client.is_connected():
-            return
-
-        tts_queues = self.vcm.data.tts_queues
-
-        if tts_queues.get(self.guild_id, []):
-            tts_queues.get(self.guild_id, []).pop(0)
-        if tts_queues.get(self.guild_id, []):
-            await VoicePlayer(self.guild_id).queue(
-                message=tts_queues.get(self.guild_id, [])[0]
-            )
+        self.vc_client = vc_client
 
     def edit_message(self, message: discord.Message) -> str:
         """読み上げ用のメッセージを作成する"""
@@ -137,7 +70,7 @@ class VoicePlayer:
     async def queue(self, message: discord.message.Message | str = None):
         """再生
         Args:
-            message (discord.Message | str): 読み上げないよう(もしくはメッセージ本体)
+            message (discord.Message | str): 読み上げ内容
         """
 
         # メッセージ判定
@@ -155,11 +88,4 @@ class VoicePlayer:
         )
 
         # 読み上げ
-        try:
-            self.vc_client.play(
-                source, after=lambda a: self.loop1.create_task(self.done())
-            )
-        except discord.errors.ClientException as clientex:
-            if isinstance(message, discord.message.Message):
-                await message.channel.send(f"⛔ 読み上げエラー : {clientex}")
-            await self.vc_client.disconnect(force=True)
+        self.vc_client.play(source)
