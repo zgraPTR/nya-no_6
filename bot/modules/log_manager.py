@@ -10,23 +10,22 @@ from .config import Config
 
 
 class Logger:
-    """ロガー"""
+    """ログ保存"""
 
-    def __init__(self, filepath):
-        """初期化"""
-
+    def __init__(self, filepath: str):
+        """
+        Args:
+            filepath (str): ファイル名
+        """
         self.config = Config()
 
         self.logger = logging.getLogger(filepath)
         self.logger.setLevel(logging.WARNING)
-
         self.formatter = logging.Formatter("----------\n%(asctime)s \n%(message)s")
-
         self.handler = logging.StreamHandler()
         self.handler.setLevel(logging.WARNING)
         self.handler.setFormatter(self.formatter)
         self.logger.addHandler(self.handler)
-
         self.fh = logging.FileHandler(self.config.log_dir + filepath, encoding="utf-8")
         self.fh.setLevel(logging.WARNING)
         self.fh.setFormatter(self.formatter)
@@ -41,24 +40,17 @@ class Logger:
             edited_message (discord.Message): 編集済みメッセージ or None
             event_type (str): 削除 or 変更
         """
-
         content = f"イベント: {event_type}\nチャンネル: {message.guild.name} / {message.channel.name}\nユーザー: {message.author.name}\n\n"
-
-        # イベントタイプ分岐
         if edited_message:
             content += f"変更前: {message.content}\n\n変更後: {edited_message.content}"
         else:
             content += f"内容 : {message.content}"
-
-        # ファイル保存
         file_names = []
         if message.attachments:
             for attachment in message.attachments:
                 file_names.append(await self.save_attachment(attachment))
-
         if file_names:
             content += f"\nファイル : {', '.join(file_names)}"
-
         self.write("WARNING", content)
 
     async def save_attachment(self, attachment: discord.Attachment) -> str:
@@ -68,7 +60,6 @@ class Logger:
         Returns:
             str: ファイル名
         """
-
         timestamp = int(time.time())
         file_name = f"{timestamp}_{attachment.filename}"
         await attachment.save(os.path.join(self.config.assets_dir, "file", file_name))

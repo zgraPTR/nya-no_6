@@ -1,9 +1,12 @@
-"""暗号化用モジュール
+"""暗号化、復号化
 """
 
 
 class Xor:
+    """暗号化、復号化"""
+
     def __init__(self):
+        """"""
         pass
 
     @staticmethod

@@ -1,4 +1,4 @@
-"""設定ファイル管理、パス管理など
+"""設定ファイル管理、パス管理
 """
 
 
@@ -9,10 +9,10 @@ from .config import Config
 
 
 class FileManager:
-    """"""
+    """ファイル操作"""
 
     def __init__(self):
-        """初期化"""
+        """"""
         self.config = Config()
 
     @property

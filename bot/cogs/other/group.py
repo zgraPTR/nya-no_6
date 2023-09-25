@@ -1,4 +1,4 @@
-"""グループ系Cog"""
+"""グループCog"""
 
 import re
 
@@ -16,7 +16,7 @@ class Group(commands.Cog):
         self.bot = bot
 
     @app_commands.command()
-    @app_commands.describe(user="Boop!先")
+    @app_commands.describe(user="Boop! 送信先")
     async def boop(self, interaction: discord.Interaction, user: discord.User):
         """Boop!"""
         from_user = interaction.user.name
@@ -28,7 +28,7 @@ class Group(commands.Cog):
 
     @app_commands.command()
     @app_commands.describe(formula="式")
-    async def eval(self, interaction: discord.Interaction, formula: str):
+    async def calculate(self, interaction: discord.Interaction, formula: str):
         """式計算"""
         safe_pattern = re.compile(r"^[\d+\-*/.() ]+$")
         if not safe_pattern.match(formula):
@@ -40,7 +40,7 @@ class Group(commands.Cog):
 
     @app_commands.command()
     @app_commands.describe(userid="ユーザーID")
-    async def profile(self, interaction: discord.Interaction, userid: str):
+    async def get_profile(self, interaction: discord.Interaction, userid: str):
         """ユーザーIDからプロフィール取得"""
         user = await self.bot.fetch_user(int(userid))
         embed = discord.Embed(title=userid)

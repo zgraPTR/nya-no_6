@@ -1,4 +1,4 @@
-"""ファイルパスなど"""
+"""ファイルパス"""
 
 import os
 
@@ -6,10 +6,10 @@ ASSETS_DIR = "../assets/"
 
 
 class Config:
-    """設定値 (デフォルト)"""
+    """設定値"""
 
     def __init__(self):
-        """初期化"""
+        """"""
         pass
 
     data = {}

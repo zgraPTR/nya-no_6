@@ -1,4 +1,4 @@
-"""管理者用Cog"""
+"""管理者Cog"""
 
 import os
 import subprocess
@@ -11,7 +11,12 @@ from modules import is_owner
 
 
 def cmd(argv: str) -> str:
-    """cmd 実行"""
+    """cmdを実行
+    Args:
+        argv (str): コマンド
+    Returns:
+        str: 実行結果
+    """
     try:
         cmd_run = subprocess.run(
             argv, shell=True, stdout=-1, stderr=-2, text=True, timeout=20, check=False
@@ -31,29 +36,29 @@ class Admin(commands.Cog):
     """管理者Cog"""
 
     def __init__(self, bot):
-        """管理者用"""
+        """"""
         self.bot: commands.Bot = bot
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    @app_commands.describe(argv="コマンド")
-    async def cmd(self, interaction: discord.Interaction, argv: str):
-        """A: cmd実行"""
+    @app_commands.describe(argv="実行するコマンド")
+    async def execute_cmd(self, interaction: discord.Interaction, argv: str):
+        """A: cmdを実行"""
         await interaction.response.send_message("💻 実行しています...")
         await interaction.channel.send(cmd(argv))
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    async def exit(self, interaction: discord.Interaction):
-        """A: 終了"""
+    async def shutdown_bot(self, interaction: discord.Interaction):
+        """A: Botを終了"""
         for vcc in self.bot.voice_clients:
             await vcc.disconnect(force=True)
         await interaction.response.send_message("⚙ 終了中です。", ephemeral=True)
         os._exit(4)
 
     @app_commands.command()
-    async def reload(self, interaction: discord.Interaction):
-        """A: リロード"""
+    async def reload_extensions(self, interaction: discord.Interaction):
+        """A: 拡張機能のみ再読込"""
         bot = self.bot
         for i in os.listdir("./cogs"):
             cog_path = f"cogs.{i}"
@@ -64,8 +69,8 @@ class Admin(commands.Cog):
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    async def restart(self, interaction: discord.Interaction):
-        """A: 再起動"""
+    async def restart_bot(self, interaction: discord.Interaction):
+        """A: Botを再起動"""
         for vcc in self.bot.voice_clients:
             await vcc.disconnect(force=True)
         cmd("clear")
@@ -73,15 +78,15 @@ class Admin(commands.Cog):
         os._exit(5)
 
     @app_commands.command()
-    async def test(self, interaction: discord.Interaction):
-        """テスト"""
+    async def test_command(self, interaction: discord.Interaction):
+        """テストコマンド"""
         embed = discord.Embed(title="test", description="テスト用")
-        embed.add_field(name="test", value=f"2")
+        embed.add_field(name="test", value="2")
         await interaction.response.send_message(embed=embed, ephemeral=True)
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    async def guild_dict(self, interaction: discord.Interaction):
+    async def list_guilds(self, interaction: discord.Interaction):
         """A: ギルド 一覧"""
         guild_str = "\n".join([f"{i.name} ( {i.id} )" for i in self.bot.guilds])
         await interaction.response.send_message(
@@ -89,8 +94,8 @@ class Admin(commands.Cog):
         )
 
     @app_commands.command()
-    async def test_error(self, interaction: discord.Interaction):
-        """A: テストエラー"""
+    async def trigger_error(self, interaction: discord.Interaction):
+        """A: エラーを発生"""
         raise Exception("エラー!")
 
     @app_commands.command()

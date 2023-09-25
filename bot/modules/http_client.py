@@ -4,9 +4,10 @@ import aiohttp
 
 
 class HttpClient:
-    """URL関係"""
+    """HttpClient"""
 
     def __init__(self):
+        """"""
         self.session = aiohttp.ClientSession()
 
     async def get_data(self, url: str) -> dict:

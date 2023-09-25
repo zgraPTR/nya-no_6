@@ -1,3 +1,5 @@
+"""読み上げCog"""
+
 import random
 
 import discord
@@ -8,10 +10,13 @@ from modules import VcConfig, VoicePlayer, is_owner, is_join
 
 
 class Tts(commands.Cog):
-    """読み上げ関係Cog"""
+    """読み上げCog"""
 
-    async def read_text(self, i):
-        """読み上げ処理"""
+    async def read_text(self, i: int):
+        """読み上げ処理
+        Args:
+            i (int): ギルドID
+        """
         vcc = self.vcc
         if not vcc.tts_queues[i]:
             return
@@ -23,10 +28,11 @@ class Tts(commands.Cog):
     @tasks.loop(seconds=0.3)
     async def tts_loop(self):
         """読み上げループ"""
-        for i in self.vcc.tts_queues:
+        for i in self.vcc.tts_queues.keys():
             await self.read_text(i)
 
     def __init__(self, bot: commands.Bot):
+        """"""
         self.bot = bot
         self.vcc = VcConfig()
         self.vcp = VoicePlayer
@@ -49,9 +55,9 @@ class Tts(commands.Cog):
     @app_commands.describe(vcid="VC CH ID")
     @app_commands.check(is_owner)
     async def admin_tts(self, interaction: discord.Interaction, vcid: str):
-        """A: VC参加 読み上げ"""
+        """A: テキスト読み上げ開始"""
         voice_channel: discord.VoiceChannel = self.bot.get_channel(int(vcid))
-        if not voice_channel.guild.voice_client in self.bot.voice_clients:
+        if voice_channel.guild.voice_client not in self.bot.voice_clients:
             await voice_channel.connect()
             await interaction.response.send_message(
                 f"🧾 **{voice_channel.guild.name}** の読み上げを開始しました｡", ephemeral=True
@@ -74,6 +80,8 @@ class Tts(commands.Cog):
         """メッセージ受信"""
         if message.author.bot:
             return
+        if not self.tts_loop.is_running():
+            self.tts_loop.start()
         tts_flag = self.vcc.tts_statuses.get(message.guild.id, None)
         tts_queues = self.vcc.tts_queues
         # 全体読み上げ or 指定部屋読み上げ
@@ -83,7 +91,7 @@ class Tts(commands.Cog):
     @app_commands.command()
     @app_commands.check(is_join)
     async def stop(self, interaction: discord.Interaction):
-        """再生停止"""
+        """通話の再生を停止する"""
         vc_client: discord.VoiceClient = interaction.guild.voice_client
         if vc_client:
             vc_client.stop()
@@ -93,17 +101,16 @@ class Tts(commands.Cog):
     @app_commands.check(is_join)
     @app_commands.describe(headcount="チーム人数")
     async def team(self, interaction: discord.Interaction, headcount: int):
-        """通話メンバー ランダムチーム分け"""
+        """通話メンバーをランダムにチーム分け"""
         mes1 = f"```\n通話メンバーを {headcount}人 でチーム分けしました。\n\n"
         # VCメンバー
         usersa = [
             member.display_name for member in interaction.user.voice.channel.members
         ]
-        usersa.remove("にゃーの")
-        # チーム編成
+        usersa.remove(self.bot.user.display_name)
         random.shuffle(usersa)
         for i in range(0, len(usersa), headcount):
-            members = "\n".join(usersa[i : i + headcount])
+            members = "\n".join(usersa[i + headcount])
             mes1 += f"チーム {i}\n{members}\n\n"
         await interaction.response.send_message(f"{mes1}\n```")
 
@@ -116,7 +123,7 @@ class Tts(commands.Cog):
         ]
     )
     async def tts(self, interaction: discord.Interaction, room: int = 1):
-        """通話 読み上げ開始"""
+        """通話でテキスト読み上げ開始"""
         status = room
         if room == 0:
             await interaction.response.send_message(
@@ -129,8 +136,8 @@ class Tts(commands.Cog):
         )
 
     @app_commands.command()
-    async def vc_value(self, interaction: discord.Interaction):
-        """読み上げない時のデバック用"""
+    async def check_vc_value(self, interaction: discord.Interaction):
+        """通話関連の値確認"""
 
         send_text = f"""```py
 tts_queue = {self.vcc.tts_queues}
@@ -138,3 +145,16 @@ tts_statuses = {self.vcc.tts_statuses}
 voice_clients = {self.vcc.voice_clients}
 ```"""
         await interaction.response.send_message(send_text)
+
+    @app_commands.command()
+    async def restart_tts(self, interaction: discord.Interaction):
+        """読み上げをリセットする (バグ対処用)"""
+        await interaction.response.send_message("> 💻 読み上げをリセットしています...")
+        self.vcc.tts_queues = {}
+        self.vcc.tts_statuses = {}
+        self.vcc.voice_clients = {}
+        for vcc in self.bot.voice_clients:
+            await vcc.disconnect(force=True)
+        if not self.tts_loop.is_running():
+            self.tts_loop.start()
+            await interaction.channel.send("> ⚙ tts_loop を起動しました。")
