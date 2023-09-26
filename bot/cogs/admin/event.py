@@ -51,18 +51,17 @@ class Event(commands.Cog):
         voice_state: discord.VoiceProtocol | None = member.guild.voice_client
         if not isinstance(voice_state, discord.VoiceClient):
             return
+        if before.channel.id == after.channel.id:
+            return
         if len(voice_state.channel.members) == 1:
             await asyncio.sleep(1.5)
             await voice_state.disconnect(force=True)
             self.vcc.voice_clients.pop(member.guild.id, None)
         else:
-            if (
-                not vc_data.tts_statuses.get(guild_id, None)
-                or before.channel == after.channel
-            ):
+            if not vc_data.tts_statuses.get(guild_id, None):
                 return
             tts_queues = vc_data.tts_queues
-            read_text = ""
+            read_text = "この文章が再生されたらどこかがおかしいよ!"
             if after.channel is None:
                 read_text = f"{member.display_name}。 が退出しました。"
             else:
