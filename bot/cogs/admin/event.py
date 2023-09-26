@@ -51,7 +51,7 @@ class Event(commands.Cog):
         voice_state: discord.VoiceProtocol | None = member.guild.voice_client
         if not isinstance(voice_state, discord.VoiceClient):
             return
-        if before.channel.id == after.channel.id:
+        if before.channel == after.channel:
             return
         if len(voice_state.channel.members) == 1:
             await asyncio.sleep(1.5)
