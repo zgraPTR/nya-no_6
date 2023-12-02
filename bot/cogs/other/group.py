@@ -40,7 +40,7 @@ class Group(commands.Cog):
 
     @app_commands.command()
     @app_commands.describe(userid="ユーザーID")
-    async def get_profile(self, interaction: discord.Interaction, userid: str):
+    async def profile(self, interaction: discord.Interaction, userid: str):
         """ユーザーIDからプロフィール取得"""
         user = await self.bot.fetch_user(int(userid))
         embed = discord.Embed(title=userid)

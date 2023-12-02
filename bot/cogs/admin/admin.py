@@ -49,7 +49,7 @@ class Admin(commands.Cog):
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    async def shutdown_bot(self, interaction: discord.Interaction):
+    async def shutdown(self, interaction: discord.Interaction):
         """A: Botを終了"""
         for vcc in self.bot.voice_clients:
             await vcc.disconnect(force=True)
@@ -57,7 +57,7 @@ class Admin(commands.Cog):
         os._exit(4)
 
     @app_commands.command()
-    async def reload_extensions(self, interaction: discord.Interaction):
+    async def reload(self, interaction: discord.Interaction):
         """A: 拡張機能のみ再読込"""
         bot = self.bot
         for i in os.listdir("./cogs"):
@@ -69,7 +69,7 @@ class Admin(commands.Cog):
 
     @app_commands.command()
     @app_commands.check(is_owner)
-    async def restart_bot(self, interaction: discord.Interaction):
+    async def restart(self, interaction: discord.Interaction):
         """A: Botを再起動"""
         for vcc in self.bot.voice_clients:
             await vcc.disconnect(force=True)
@@ -78,7 +78,7 @@ class Admin(commands.Cog):
         os._exit(5)
 
     @app_commands.command()
-    async def test_command(self, interaction: discord.Interaction):
+    async def test(self, interaction: discord.Interaction):
         """テストコマンド"""
         embed = discord.Embed(title="test", description="テスト用")
         embed.add_field(name="test", value="2")

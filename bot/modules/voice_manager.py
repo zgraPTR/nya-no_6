@@ -3,44 +3,99 @@
 import re
 
 import discord
+from discord.ext import tasks
 from gtts import gTTS
 
 from modules import Config, FileManager
 
 
-class VcConfig:
-    """VC値 (デフォ)"""
-
-    singleton = None
-    name = None
-
-    def __new__(cls, *args, **kwargs):
-        if cls.singleton == None:
-            cls.singleton = super().__new__(cls)
-        # クラスのインスタンスを返す
-        return cls.singleton
-
+class VcManager:
+    """VC値 管理"""
+    # 曲再生なら使用
     music_loops: dict[int, bool] = {}
     music_queues: dict[int, list[str]] = {}
     music_statuses: dict[int, int] = {}
-    tts_queues: dict[int, list[str]] = {}
+    # ttsなら使用
+    tts_queues: dict[int, list[discord.message.Message | str]] = {}
     tts_statuses: dict[int, int] = {}
+    # 再生用
     voice_clients: dict[int, discord.voice_client.VoiceClient] = {}
+
+    def __init__(self) -> None:
+        """"""
+        self.vcp = VoicePlayer()
+    
+    def add_queue(self, guild_id: int, read_text: discord.message.Message | str):
+        """tts 読み上げ追加
+        Args:
+            guild_id (int): 
+            read_text (str): 
+        """
+        if not self.vcm_loop.is_running():
+            self.vcm_loop.start()
+        self.tts_queues.setdefault(guild_id, []).append(read_text)
+
+    @tasks.loop(seconds=1)
+    async def vcm_loop(self):
+        """読み上げチェック"""
+        for i in self.tts_queues:
+            queues = self.tts_queues.get(i, [])
+            if len(queues) == 0:
+                return
+            vc = self.voice_clients.get(i, None)
+            
+            if not vc.is_playing():
+                await self.vcp.read_text(vc, self.tts_queues[i][0])
+                self.tts_queues[i].pop(0, None)
+    
+    def on_message(self, message: discord.message.Message):
+        """受信時処理
+        Args:
+            message (discord.message.Message):
+        """
+        tts_statuses = self.tts_statuses.get(message.guild.id, 0)
+        
+        if not self.vcm_loop.is_running():
+            self.vcm_loop.start()
+        if tts_statuses == 1 or tts_statuses == message.channel.id:
+            self.add_queue(message.guild.id, message)
+        
+    def vc_add(self, voice_client: discord.voice_client.VoiceClient, vc_type = "tts", status = 1):
+        """vcリスト追加
+        Args:
+            voice_client (discord.voice_client.VoiceClient):
+            vc_type (str, optional): tts
+            status : 1 -> ギルド全体, chid
+        """
+        guild_id = voice_client.guild.id
+        self.voice_clients[guild_id] = voice_client
+
+        if vc_type == "tts":
+            self.tts_statuses[guild_id] = status
+
+    def vc_remove(self, voice_client: discord.voice_client.VoiceClient, vc_type="tts"):
+        """vcリスト削除
+        Args:
+            voice_client (discord.voice_client.VoiceClient): 
+            vc_type (str, optional): tts
+        """
+        guild_id = voice_client.guild.id
+        self.voice_clients.pop(guild_id, None)
+
+        if vc_type == "tts":
+            self.tts_statuses.pop(guild_id, None)
+            
+        if self.vcm_loop.is_running():
+            self.vcm_loop.stop()
 
 
 class VoicePlayer:
     """VC再生"""
 
-    def __init__(self, guild_id: int, vc_client: discord.voice_client.VoiceClient):
-        """
-        Args:
-            guild_id (int):
-            vc_client (discord.voice_client.VoiceClient):
-        """
+    def __init__(self):
+        """"""
         self.config = Config()
         self.fm = FileManager()
-        self.guild_id = guild_id
-        self.vc_client = vc_client
 
     def edit_message(self, message: discord.Message) -> str:
         """読み上げメッセージを編集"""
@@ -64,24 +119,25 @@ class VoicePlayer:
             str: ファイルパス
         """
         savedir = (
-            f"{self.fm.get_assets_path}/{self.config.audio_dir}/{self.guild_id}.mp3"
+            f"{self.config.audio_dir}{self.guild_id}.mp3"
         )
         speech = gTTS(text, lang="ja")
         speech.save(savedir)
         return savedir
 
-    async def queue(self, message: discord.message.Message | str = None):
+    async def read_text(self, vc_client: discord.voice_client.VoiceClient, message: discord.message.Message | str):
         """再生
         Args:
             message (discord.Message | str): 読み上げ内容
         """
+        self.guild_id = vc_client.guild.id
         if isinstance(message, discord.message.Message):
             tts_text = self.edit_message(message)
         elif isinstance(message, str):
             tts_text = message
         tts_dir = await self.save_tts(tts_text)
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(tts_dir, options="-loglevel panic"),
+            discord.FFmpegPCMAudio(tts_dir),
             volume=0.15,
         )
-        self.vc_client.play(source)
+        vc_client.play(source)

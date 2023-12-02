@@ -46,7 +46,7 @@ class Ftps:
         """初期化"""
 
         self.ftp = FTP(timeout=10)
-        self.ftp.connect(host="192.168.11.31", port=5049)
+        self.ftp.connect(host="192.168.11.30", port=5049)
         self.ftp.login(user="pc", passwd="0000")
         self.ftp.set_pasv(True)
 
