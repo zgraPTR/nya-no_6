@@ -85,8 +85,7 @@ class InputFunction:
 
     def run(self):
         """Botをサブプロセスで実行する"""
-
-        token_key = input("\nToken Key : ")
+        token_key = input("\nToken暗号化キー (暗号化しているなら入力) : ")
 
         is_loop = True
         while is_loop:

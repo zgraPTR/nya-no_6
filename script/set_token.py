@@ -3,27 +3,38 @@
 Xor暗号化 -> https://qiita.com/magiclib/items/fe2c4b2c4a07e039b905
 """
 
-from modules import Pick, Xor
+from modules import JsonManager, Xor
 
 
 def main():
     """_summary_"""
-    pickle_ = Pick("token.bin")
+    jm = JsonManager("token.json")
     xor = Xor()
 
-    token = pickle_.read()
+    token_dict = jm.read()
 
-    token_key = input("\nToken Key : ")
-    if token:
-        token_decrypto = xor.decrypto_hex_to_text(token, token_key)
-        print("\nDiscord Token : ", token_decrypto)
-        print("Tokenを変更したい場合は assets/config/token.bin を削除してください。")
-    else:
-        token = input("\nDiscord Bot Token : ")
-        # 暗号化して保存
-        token_crypto = xor.crypto_text_to_hex(token, token_key)
-        pickle_.write(token_crypto)
-        print("Tokenをセットしました。")
+    if token_dict:
+        token = token_dict.get("token", "不明")
+        if token_dict.get("is_crypto", False):
+            token_crypto_key = input("\nToken暗号キー : ")
+            token = xor.decrypto_hex_to_text(token, token_crypto_key)
+        print("\nDiscord Token : ", token)
+        print("\nTokenを変更したい場合は assets/config/token.json を削除してください。")
+        return
+
+    token_dict = {"is_crypto": 0, "token": ""}
+
+    token = input("\nDiscord Bot Token : ")
+    is_decrypto = input("\n暗号化しますか? (y/n) : ")
+
+    if is_decrypto == "y":
+        token_dict["is_crypto"] = 1
+        token_decrypto_key = input("\nToken暗号キー : ")
+        token = xor.crypto_text_to_hex(token, token_decrypto_key)
+
+    token_dict["token"] = token
+    jm.write(token_dict)
+    print("\n設定しました。")
 
 
 if __name__:

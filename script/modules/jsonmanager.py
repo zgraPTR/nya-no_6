@@ -1,36 +1,34 @@
 """Pickle管理する モジュール
 """
 
+import json
 import os
-import pickle
 
 # ディレクトリ
 config_path = "assets/config/"
 
 
-class Pick:
+class JsonManager:
     """設定ファイル"""
 
-    def __init__(self, filepath="config.bin"):
+    def __init__(self, filepath="config.json"):
         """初期化
         Args:
-            filepath (str): ファイル名. Defaults to "Config.pick".
+            filepath (str): ファイル名
         """
         self.filepath = config_path + filepath
 
-    def read(self):
+    def read(self) -> dict:
         """読み込む"""
-
         if not os.path.exists(self.filepath):
             return None
-        with open(self.filepath, mode="rb") as f:
-            return pickle.load(f)
+        with open(self.filepath, mode="r") as f:
+            return json.load(f)
 
     def write(self, objdata):
         """書き込む
         Args:
             objdata (_type_): 保存するオブジェクト
         """
-
-        with open(self.filepath, mode="wb") as f:
-            pickle.dump(objdata, f)
+        with open(self.filepath, mode="w") as f:
+            json.dump(objdata, f, indent=4, ensure_ascii=False)

@@ -21,12 +21,14 @@ class Logger:
 
         self.logger = logging.getLogger(filepath)
         self.logger.setLevel(logging.WARNING)
-        self.formatter = logging.Formatter("----------\n%(asctime)s \n%(message)s")
+        self.formatter = logging.Formatter(
+            "----------\n%(asctime)s \n%(message)s")
         self.handler = logging.StreamHandler()
         self.handler.setLevel(logging.WARNING)
         self.handler.setFormatter(self.formatter)
         self.logger.addHandler(self.handler)
-        self.fh = logging.FileHandler(self.config.log_dir + filepath, encoding="utf-8")
+        self.fh = logging.FileHandler(
+            self.config.log_dir + filepath, encoding="utf-8")
         self.fh.setLevel(logging.WARNING)
         self.fh.setFormatter(self.formatter)
         self.logger.addHandler(self.fh)

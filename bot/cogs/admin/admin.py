@@ -88,7 +88,8 @@ class Admin(commands.Cog):
     @app_commands.check(is_owner)
     async def list_guilds(self, interaction: discord.Interaction):
         """A: ギルド 一覧"""
-        guild_str = "\n".join([f"{i.name} ( {i.id} )" for i in self.bot.guilds])
+        guild_str = "\n".join(
+            [f"{i.name} ( {i.id} )" for i in self.bot.guilds])
         await interaction.response.send_message(
             f"```\n{len(self.bot.guilds)} つのギルドに参加中です。\n{guild_str}\n```"
         )

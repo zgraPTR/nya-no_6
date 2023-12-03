@@ -38,7 +38,7 @@ class Tts(commands.Cog):
             await interaction.response.send_message(
                 f"🧾 **{voice_channel.guild.name}** の読み上げを開始しました｡", ephemeral=True
             )
-        self.vcm.vc_add(interaction.guild.voice_client, "tts", status= 1)
+        self.vcm.vc_add(interaction.guild.voice_client, "tts", status=1)
 
     @app_commands.command()
     async def leave(self, interaction: discord.Interaction):

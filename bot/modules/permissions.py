@@ -12,7 +12,7 @@ def is_owner(interaction: discord.Interaction) -> bool:
         interaction (discord.Interaction)
     """
     FileManager().read_config()
-    return str(interaction.user.id) in Config.data.get("is_owner", "555729675213602816")
+    return str(interaction.user.id) in Config.data.get("owner_id", "555729675213602816")
 
 
 async def is_join(interaction: discord.Interaction) -> bool:

@@ -23,7 +23,7 @@ class Config:
 
     @property
     def audio_dir(self):
-        return self.assets_dir + self.dir_dict["audio"]
+        return self.assets_dir+self.dir_dict["audio"]
 
     @property
     def config_dir(self):
@@ -40,8 +40,8 @@ class Config:
 
     @property
     def token_path(self):
-        return "token.bin"
+        return "token.json"
 
     @property
     def voice_path(self):
-        return "voice.bin"
+        return "voice.json"

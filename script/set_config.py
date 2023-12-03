@@ -2,25 +2,25 @@
 Configクラスの内容がファイルに保存される
 """
 
-from modules import Pick
+from modules import JsonManager
 
 
-config_dict = {"is_owner": ["947380475389947944", "555729675213602816"]}
+config_dict = {"owner_id": ["947380475389947944", "555729675213602816"]}
 
 
 def main():
     """実行"""
 
-    run_def = input("\n0 : 読み込み\n1 : 書き込み\n数字を入力 : ")
+    run_def = input("\n0 : 読み込み\n1 : 書き込み\n\n数字を入力 : ")
 
     print("\n")
 
-    pickle_ = Pick("config.bin")
+    jm = JsonManager("config.json")
     if run_def == "0":
-        data = pickle_.read()
+        data = jm.read()
         print(data)
     elif run_def == "1":
-        pickle_.write(config_dict)
+        jm.write(config_dict)
         print("書き込みが完了しました。")
 
 

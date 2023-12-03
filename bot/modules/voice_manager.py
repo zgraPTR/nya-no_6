@@ -6,7 +6,7 @@ import discord
 from discord.ext import tasks
 from gtts import gTTS
 
-from modules import Config, FileManager
+from modules import Config
 
 
 class VcManager:
@@ -24,7 +24,7 @@ class VcManager:
     def __init__(self) -> None:
         """"""
         self.vcp = VoicePlayer()
-    
+
     def add_queue(self, guild_id: int, read_text: discord.message.Message | str):
         """tts 読み上げ追加
         Args:
@@ -37,30 +37,28 @@ class VcManager:
 
     @tasks.loop(seconds=1)
     async def vcm_loop(self):
-        """読み上げチェック"""
+        """読み上げ確認"""
         for i in self.tts_queues:
             queues = self.tts_queues.get(i, [])
             if len(queues) == 0:
                 return
             vc = self.voice_clients.get(i, None)
-            
             if not vc.is_playing():
                 await self.vcp.read_text(vc, self.tts_queues[i][0])
                 self.tts_queues[i].pop(0, None)
-    
+
     def on_message(self, message: discord.message.Message):
         """受信時処理
         Args:
             message (discord.message.Message):
         """
         tts_statuses = self.tts_statuses.get(message.guild.id, 0)
-        
         if not self.vcm_loop.is_running():
             self.vcm_loop.start()
         if tts_statuses == 1 or tts_statuses == message.channel.id:
             self.add_queue(message.guild.id, message)
-        
-    def vc_add(self, voice_client: discord.voice_client.VoiceClient, vc_type = "tts", status = 1):
+
+    def vc_add(self, voice_client: discord.voice_client.VoiceClient, vc_type="tts", status=1):
         """vcリスト追加
         Args:
             voice_client (discord.voice_client.VoiceClient):
@@ -84,18 +82,17 @@ class VcManager:
 
         if vc_type == "tts":
             self.tts_statuses.pop(guild_id, None)
-            
+
         if self.vcm_loop.is_running():
             self.vcm_loop.stop()
 
 
 class VoicePlayer:
-    """VC再生"""
+    """vc 再生"""
 
     def __init__(self):
         """"""
         self.config = Config()
-        self.fm = FileManager()
 
     def edit_message(self, message: discord.Message) -> str:
         """読み上げメッセージを編集"""

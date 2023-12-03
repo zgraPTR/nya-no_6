@@ -3,7 +3,7 @@
 
 
 import os
-import pickle
+import json
 
 from .config import Config
 
@@ -41,8 +41,8 @@ class FileManager:
         if not os.path.exists(filedir):
             return {}
 
-        with open(filedir, "rb") as load_data:
-            objdata = pickle.load(load_data)
+        with open(filedir, "r") as load_data:
+            objdata = json.load(load_data)
 
         return objdata
 
@@ -59,5 +59,5 @@ class FileManager:
         """
         filedir: str = self.get_config_path + filename
 
-        with open(filedir, mode="wb") as f:
-            pickle.dump(objdata, f)
+        with open(filedir, mode="w") as f:
+            json.dump(objdata, f, indent=4, ensure_ascii=False)

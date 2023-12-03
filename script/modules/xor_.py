@@ -14,7 +14,8 @@ class Xor:
         """
         xor_code = (key * ((len(src_text) // len(key)) + 1))[: len(src_text)]
         encrypted_data = "".join(
-            [chr(ord(data) ^ ord(code)) for (data, code) in zip(src_text, xor_code)]
+            [chr(ord(data) ^ ord(code))
+             for (data, code) in zip(src_text, xor_code)]
         )
         return encrypted_data.encode().hex()
 
@@ -29,8 +30,10 @@ class Xor:
         except ValueError:
             return ""
 
-        xor_code = (key * ((len(crypt_data) // len(key)) + 1))[: len(crypt_data)]
+        xor_code = (key * ((len(crypt_data) // len(key)) + 1)
+                    )[: len(crypt_data)]
         decrypted_data = "".join(
-            [chr(ord(data) ^ ord(code)) for (data, code) in zip(crypt_data, xor_code)]
+            [chr(ord(data) ^ ord(code))
+             for (data, code) in zip(crypt_data, xor_code)]
         )
         return decrypted_data

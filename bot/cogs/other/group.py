@@ -11,8 +11,7 @@ class Group(commands.Cog):
     """グループCog"""
 
     def __init__(self, bot: commands.Bot) -> None:
-        """グループ用"""
-
+        """"""
         self.bot = bot
 
     @app_commands.command()

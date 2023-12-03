@@ -36,7 +36,8 @@ class Event(commands.Cog):
         """読み込み完了"""
         await self.bot.tree.sync()
         await self.bot.change_presence(activity=discord.Game(name="にゃーの6代目"))
-        self.logger.write("WARNING", f"Event > {self.bot.user.display_name} ログインしました。")
+        self.logger.write(
+            "WARNING", f"Event > {self.bot.user.display_name} ログインしました。")
 
     @commands.Cog.listener()
     async def on_voice_state_update(
@@ -53,10 +54,10 @@ class Event(commands.Cog):
         if not isinstance(voice_state, discord.VoiceClient):
             return
         if len(voice_state.channel.members) == 1:
-                await asyncio.sleep(1.5)
-                await voice_state.disconnect(force=True)
-                self.vcm.vc_remove(voice_state)
-                return
+            await asyncio.sleep(1.5)
+            await voice_state.disconnect(force=True)
+            self.vcm.vc_remove(voice_state)
+            return
         if before.channel != after.channel:
             if not vc_data.tts_statuses.get(guild_id, None):
                 return
